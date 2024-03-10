@@ -13,7 +13,8 @@ git clone https://github.com/ventositwaitang/Stock-News-Dynamic-Crawling.git
 ## Usage
 To navigate example, please click on static notebook
 https://nbviewer.org/github/ventositwaitang/Stock-News-Dynamic-Crawling.ipynb/blob/main/News_Crawling.ipynb
-if [.ipynb](https://github.com/ventositwaitang/Stock-News-Dynamic-Crawling.ipynb/blob/main/News_Crawling.ipynb) have render issue
+
+if [News_Crawling.ipynb](https://github.com/ventositwaitang/Stock-News-Dynamic-Crawling.ipynb/blob/main/News_Crawling.ipynb) have render issue
 ```bash
 python crawling.py
 ```
