@@ -1,6 +1,6 @@
 # AAStocks
 
-"AAStocks" is a Python program for crawling news info from [AAStocks](http://www.aastocks.com/en/stocks/news/aafn-company-news)
+"AAStocks" is a Python Dynamic-Crawling program for Sentiment of news info from [AAStocks](http://www.aastocks.com/en/stocks/news/aafn-company-news)
 
 ## Installation
 
