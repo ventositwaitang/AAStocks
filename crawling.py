@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import time
 from urllib.parse import urljoin
 import json
+import os
 
 import pandas as pd
 import numpy as np
@@ -126,7 +127,12 @@ class Crawling:
             df = df.convert_dtypes()
             print(df.info())
             path = f'News Repository/AAstocksWEEKLYcompNews_{df['Releasing time'][0].strftime("%Y-%m-%d")}_{df['Releasing time'][-1].strftime("%Y-%m-%d")}.xlsx'
-            df.to_excel( path, index=True, header = df.columns)
+            try:
+		df.to_excel( path, index=True, header = df.columns)
+	    except:
+		os.mkdir("News Repository")
+		df.to_excel( path, index=True, header = df.columns)
+            
 
 if __name__ == '__main__':
 
@@ -137,6 +143,6 @@ if __name__ == '__main__':
     #     "Referer": "http://www.aastocks.com/en/stocks/news/aafn/latest-news/0"}
 
     AAStocks = Crawling(url, scrolls_to_bottum=scrolls_to_bottum) # times of scrolling to bottum in initial url
-    AAStocks.sentiment()
+    AAStocks.Sentiment()
     AAStocks.Symbol_fol()
     AAStocks.save_file()
