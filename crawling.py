@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import time
 from urllib.parse import urljoin
 import json
-import os
 
 import pandas as pd
 import numpy as np
@@ -42,6 +41,7 @@ class Crawling:
 
             browser.get(self.url)
             time.sleep(2)  # Allow 2 seconds for the web page to open
+
             scroll_pause_time = 3 # load all weekly news (15 pages)
             previous_height = browser.execute_script("return document.body.scrollHeight;")  # starting height
             counter = 1
@@ -54,7 +54,7 @@ class Crawling:
                 counter += 1
                 # Break the loop when the height we need to scroll to is larger than the total scroll height
                 if counter > scrolls_to_bottum:  #if (screen_height) * i > scroll_height:
-                  break
+                    break
 
             # after loading all documents..
             self.whens = [tve.text for i,tve in enumerate(browser.find_elements(By.CSS_SELECTOR,'div.inline_block')) if len(tve.text)==16]
@@ -64,22 +64,23 @@ class Crawling:
             self.Polarity = []
             for tve in list(browser.find_elements(By.CLASS_NAME,'div_VoteTotal')): # even i divBullish ,odd i for Bearish
 
-              Bullish = int(tve.text.split('tive')[1].replace('Nega',''))
-              Bearish = int(tve.text.split('tive')[2])
-              VE = Bullish-Bearish
+                  Bullish = int(tve.text.split('tive')[1].replace('Nega',''))
+                  Bearish = int(tve.text.split('tive')[2])
+                  VE      = Bullish - Bearish
 
-              self.pos.append(Bullish)
-              self.neg.append(Bearish)
-              self.Polarity.append('positive' if VE > 0 else 'negative' if VE < 0 else 'neutral')
+                  self.pos.append(Bullish)
+                  self.neg.append(Bearish)
+                  self.Polarity.append('positive' if VE > 0 else 'negative' if VE < 0 else 'neutral')
             print(len(self.Polarity),'Polarity inserted: [..,"'+self.Polarity[-1]+'"],',counter-1,'pages done')
 
             ## get ['Headline'] & news follow links
             self.headlines = [] #self.headlines = [h.text for h in list(browser.find_elements(By.CLASS_NAME,'newshead4'))]
-            self.links = []
+            self.links     = []
             for h in list(browser.find_elements(By.XPATH,"//div[contains(@class, 'newshead4')]/a")):
-              self.headlines.append(h.text)
-              self.links.append(h.get_attribute('href'))
+                self.headlines.append(h.text)
+                self.links.append(h.get_attribute('href'))
             browser.close()
+
             print(len(self.headlines),'headlines inserted: [..,"'+self.headlines[-1]+'"],',counter-1,'pages done')
             print(len(self.links),'links inserted: [..,"'+self.links[-1]+'"],',counter-1,'pages done')
             print('Thank you for your patience :)')
@@ -90,8 +91,8 @@ class Crawling:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
                 "Referer": "http://www.aastocks.com/en/stocks/news/aafn-company-news"
             }
-            self.symbols = []
-            self.names = []
+            self.symbols   = []
+            self.names     = []
             self.abstracts = []
             browser = webdriver.Chrome('chromedriver', options=chrome_options)
             print('Hi, I am further digging Symbols for a while, Please take a break or have a cup of tea ;)')
@@ -102,11 +103,10 @@ class Crawling:
                 print('Loading 2 sec to pretend as a human..')
                 time.sleep(2)
                 self.abstracts.append(browser.find_element(By.XPATH, '//p').text)
-                print(len(self.abstracts), 'abstracts inserted')
+                print(len(self.abstracts), ' abstracts inserted')
                 try:
-                    #   sym = soup.find("a",class_='jsStock jsBmpStock')['sym']
-                    button = browser.find_element(By.XPATH,
-                                                  '//a[@class="jsStock jsBmpStock"]')
+                    #sym   = soup.find("a",class_='jsStock jsBmpStock')['sym']
+                    button = browser.find_element(By.XPATH, '//a[@class="jsStock jsBmpStock"]')
                 except Exception as e:
                     print(e, '\nNo Ticker button appears, getting Related Symbol')
                     button = browser.find_element(By.LINK_TEXT, "Related News")  # related symbol from news' fol link
@@ -121,18 +121,19 @@ class Crawling:
 
 
         def save_file(self):
-            df = pd.DataFrame({'Headline': self.headlines, 'Releasing time': self.whens,
-                               'Polarity': self.Polarity, 'Positive': self.pos, 'Negative': self.neg,
-                               'Symbols':self.symbols, 'Company name':self.names, 'Abstract':self.abstracts})
-            df = df.convert_dtypes()
+            df = pd.DataFrame()
+            df['Headline']      = self.headlines
+            df['Releasing time']= self.whens
+            df['Polarity']      = self.Polarity
+            df['Positive']      = self.pos
+            df['Negative']      = self.neg
+            df['Symbols']       = self.symbols
+            df['Company name']  = self.names
+            df['Abstract']      = self.abstracts
+            df = df.convert_dtypes() # ensure best possible dtypes
             print(df.info())
             path = f'News Repository/AAstocksWEEKLYcompNews_{df['Releasing time'][0].strftime("%Y-%m-%d")}_{df['Releasing time'][-1].strftime("%Y-%m-%d")}.xlsx'
-            try:
-		df.to_excel( path, index=True, header = df.columns)
-	    except:
-		os.mkdir("News Repository")
-		df.to_excel( path, index=True, header = df.columns)
-            
+            df.to_excel( path, index=True, header = df.columns)
 
 if __name__ == '__main__':
 
@@ -143,6 +144,6 @@ if __name__ == '__main__':
     #     "Referer": "http://www.aastocks.com/en/stocks/news/aafn/latest-news/0"}
 
     AAStocks = Crawling(url, scrolls_to_bottum=scrolls_to_bottum) # times of scrolling to bottum in initial url
-    AAStocks.Sentiment()
+    AAStocks.sentiment()
     AAStocks.Symbol_fol()
     AAStocks.save_file()
